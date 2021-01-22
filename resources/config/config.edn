@@ -1,0 +1,8 @@
+{:app
+ {:youtube
+  {:output-format "%(title)s-%(epoch)s.%(ext)s"
+   ;; :output-folder "/home/site/storage/files/"
+   :output-folder "/tmp/"
+   :base-url "https://alenkinaskazka.net/files/"}
+  :telegram
+  {:bot-api-key #env TELEGRAM_BOT_API_TOKEN}}}
