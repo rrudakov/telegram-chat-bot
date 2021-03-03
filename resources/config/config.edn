@@ -2,6 +2,10 @@
  {:youtube
   {:output-format "%(title)s-%(epoch)s.%(ext)s"
    :output-folder "/tmp/"}
+  :coloring
+  {:api-key    #env GOOGLE_API_KEY
+   :cx         #env GOOGLE_SEARCH_ENGINE_ID
+   :search-url "https://www.googleapis.com/customsearch/v1/siterestrict"}
   :telegram
   {:bot-api-key #env TELEGRAM_BOT_API_TOKEN}
   :aws

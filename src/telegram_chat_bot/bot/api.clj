@@ -45,3 +45,13 @@
                {:multipart [{:name "chat_id" :content (str chat-id)}
                             {:name "video" :content (io/file video)}
                             {:name "caption" :content (or caption "")}]}))
+
+(defn send-picture
+  "Send `image` to chat with `chat-id` on behalf of bot."
+  ([token chat-id image]
+   (send-picture token chat-id image {}))
+  ([token chat-id image options]
+   (execute-command token "sendPhoto"
+                    (-> options
+                        (assoc :chat_id (str chat-id))
+                        (assoc :photo image)))))

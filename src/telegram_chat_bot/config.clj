@@ -28,3 +28,15 @@
     {:access-key (:s3-access-key aws)
      :secret-key (:s3-secret-key aws)
      :endpoint   (:s3-endpoint aws)}))
+
+(defn google-api-key
+  [config]
+  (get-in config [:app :coloring :api-key]))
+
+(defn google-cx
+  [config]
+  (get-in config [:app :coloring :cx]))
+
+(defn google-search-url
+  [config]
+  (get-in config [:app :coloring :search-url]))
