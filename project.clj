@@ -14,6 +14,8 @@
                  [aero "1.1.6"]
                  [clj-http "3.10.3"]
                  [cheshire "5.10.0"]
+                 [amazonica "0.3.153"]
+                 [clj-time "0.15.2"]
                  [com.fasterxml.jackson.core/jackson-core "2.12.1"]]
   :repl-options {:init-ns telegram-chat-bot.core}
   :plugins [[lein-ring "0.12.5"]

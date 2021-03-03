@@ -1,10 +1,11 @@
 (ns telegram-chat-bot.commands.youtube
-  (:require [clojure.java.shell :as shell]
+  (:require [amazonica.aws.s3 :as s3]
+            [clj-time.core :as t]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [telegram-chat-bot.bot.api :as bot]
             [telegram-chat-bot.commands.utils :as utils]
-            [telegram-chat-bot.config :as conf])
-  (:import [java.nio.file Files Paths]))
+            [telegram-chat-bot.config :as conf]))
 
 (defn- extract-best-format-code
   [url]
@@ -36,38 +37,36 @@
                    url
                    "--restrict-filenames")))
 
+(defn- upload-to-s3
+  [config key file-path]
+  (let [bucket-name (conf/bucket-name config)
+        cred        (conf/aws-creds config)]
+    (s3/put-object cred
+                   :bucket-name bucket-name
+                   :key key
+                   :file file-path)
+    (str (s3/generate-presigned-url cred bucket-name key (-> 6 t/hours t/from-now)))))
+
 (defn- rm-file
   [file-name]
   (shell/sh "rm" "-f" file-name))
 
-(defn- get-file-size
-  [file-path]
-  (-> file-path
-      (Paths/get (into-array String []))
-      (Files/size)
-      (/ 1024 1024)))
-
-(defn- check-file-size-and-send-video
-  [token chat-id video-path video-url]
-  (if (< (get-file-size video-path) 50)
-    (do
-      (bot/send-video token chat-id video-path :caption "Готово!")
-      (rm-file video-path))
-    (bot/send-message token chat-id (str "Готово! " video-url)
-                      {:disable_web_page_preview true})))
+(defn- send-link-to-the-chat
+  [token chat-id video-path video-name config]
+  (let [link (upload-to-s3 config video-name video-path)]
+    (bot/send-message token chat-id (str "Готово! " link))
+    (rm-file video-path)))
 
 (defn- download-youtube-video
   [token chat-id config url]
   (bot/send-message token chat-id "Уже качаю")
   (let [output-format    (conf/youtube-dl-output-format config)
         output-folder    (conf/youtube-dl-output-folder config)
-        base-url         (conf/youtube-dl-base-url config)
         best-format-code (extract-best-format-code url)
         video-name       (youtube-dl-get-video-name output-format best-format-code url)
-        video-path       (str/join [output-folder video-name])
-        video-url        (str/join [base-url video-name])]
+        video-path       (str/join [output-folder video-name])]
     (case (youtube-dl-download-video url best-format-code video-path)
-      0 (check-file-size-and-send-video token chat-id video-path video-url)
+      0 (send-link-to-the-chat token chat-id video-path video-name config)
       (bot/send-message token chat-id "Че то никак :("))))
 
 (defn execute-download-command

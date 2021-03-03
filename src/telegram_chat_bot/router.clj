@@ -12,10 +12,9 @@
             [telegram-chat-bot.commands.utils :as utils]))
 
 (defn unknown-action
-  [config body]
+  [config body command]
   (let [message (or (:message body) (:edited_message body))
         chat-id (get-in message [:chat :id])
-        command (utils/extract-entity body "bot_command")
         text    (str "Извините, я пока не умею выполнять команду " command)]
     (bot/send-message (conf/telegram-bot-api-token config) chat-id text)))
 
@@ -30,7 +29,7 @@
   (if-let [command (utils/extract-entity body "bot_command")]
     (case command
       "/download" (yt/execute-download-command config body)
-      (unknown-action config body))
+      (unknown-action config body command))
     (keep-conversation config body)))
 
 (defn handler

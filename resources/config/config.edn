@@ -1,8 +1,11 @@
 {:app
  {:youtube
   {:output-format "%(title)s-%(epoch)s.%(ext)s"
-   :output-folder "/home/site/storage/files/"
-   ;; :output-folder "/tmp/"
-   :base-url "https://alenkinaskazka.net/files/"}
+   :output-folder "/tmp/"}
   :telegram
-  {:bot-api-key #env TELEGRAM_BOT_API_TOKEN}}}
+  {:bot-api-key #env TELEGRAM_BOT_API_TOKEN}
+  :aws
+  {:s3-bucket-name "telegram-bot-downloads"
+   :s3-access-key  #env AWS_ACCESS_KEY_ID
+   :s3-secret-key  #env AWS_SECRET_ACCESS_KEY
+   :s3-endpoint    "eu-central-1"}}}

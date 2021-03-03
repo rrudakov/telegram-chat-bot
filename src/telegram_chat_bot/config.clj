@@ -18,6 +18,13 @@
   [config]
   (get-in config [:app :youtube :output-folder]))
 
-(defn youtube-dl-base-url
+(defn bucket-name
   [config]
-  (get-in config [:app :youtube :base-url]))
+  (get-in config [:app :aws :s3-bucket-name]))
+
+(defn aws-creds
+  [config]
+  (let [aws (get-in config [:app :aws])]
+    {:access-key (:s3-access-key aws)
+     :secret-key (:s3-secret-key aws)
+     :endpoint   (:s3-endpoint aws)}))
