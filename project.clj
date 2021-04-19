@@ -1,4 +1,4 @@
-(defproject telegram-chat-bot "0.3.0"
+(defproject telegram-chat-bot "0.3.1-SNAPSHOT"
   :description "Telegram chat bot for my personal needs"
   :url "https://github.com/rrudakov/telegram-chat-bot"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
