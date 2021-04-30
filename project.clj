@@ -25,7 +25,6 @@
                   ["vcs" "commit"]
                   ["vcs" "tag"]
                   ["change" "version" "str" "\"-SNAPSHOT\""]
-                  ;; ["change" "version" "leiningen.release/bump-version"]
                   ["vcs" "commit"]
                   ["vcs" "push"]]
   :plugins [[lein-ring "0.12.5"]
