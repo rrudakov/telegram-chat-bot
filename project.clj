@@ -1,4 +1,4 @@
-(defproject telegram-chat-bot "0.4.0"
+(defproject telegram-chat-bot "0.4.0-SNAPSHOT"
   :description "Telegram chat bot for my personal needs"
   :url "https://github.com/rrudakov/telegram-chat-bot"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -26,9 +26,8 @@
                   ["vcs" "tag"]
                   ["change" "version" "str" "\"-SNAPSHOT\""]
                   ;; ["change" "version" "leiningen.release/bump-version"]
-                  ;; ["vcs" "commit"]
-                  ;; ["vcs" "push"]
-                  ]
+                  ["vcs" "commit"]
+                  ["vcs" "push"]]
   :plugins [[lein-ring "0.12.5"]
             [lein-cljfmt "0.7.0"]]
   :cljfmt {}
