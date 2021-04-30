@@ -19,13 +19,16 @@
                  [com.fasterxml.jackson.core/jackson-core "2.12.1"]]
   :repl-options {:init-ns telegram-chat-bot.core}
   :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version" "leiningen.release/bump-version"]
                   ["change" "version"
                    "leiningen.release/bump-version" "release"]
                   ["vcs" "commit"]
                   ["vcs" "tag"]
-                  ["change" "version" "leiningen.release/bump-version"]
-                  ["vcs" "commit"]
-                  ["vcs" "push"]]
+                  ["change" "version" "str" "\"-SNAPSHOT\""]
+                  ;; ["change" "version" "leiningen.release/bump-version"]
+                  ;; ["vcs" "commit"]
+                  ;; ["vcs" "push"]
+                  ]
   :plugins [[lein-ring "0.12.5"]
             [lein-cljfmt "0.7.0"]]
   :cljfmt {}
