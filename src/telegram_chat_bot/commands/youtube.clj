@@ -17,7 +17,18 @@
            (re-find #"^(\d+)\s")
            (second)))
 
-(defn- youtube-dl-get-video-name
+(defn- extract-audio-format-code
+  [url]
+  (some->> (shell/sh "youtube-dl" "-F" url)
+           (:out)
+           (str/split-lines)
+           (filterv #(and (str/includes? % "audio only")
+                          (str/includes? % "m4a")))
+           (last)
+           (re-find #"^(\d+)\s")
+           (second)))
+
+(defn- youtube-dl-get-name
   [output-format format-code url]
   (->> (shell/sh "youtube-dl"
                  "-f" format-code
@@ -28,7 +39,7 @@
        (:out)
        (str/trim)))
 
-(defn- youtube-dl-download-video
+(defn- youtube-dl-download
   [url format-code output-format]
   (:exit (shell/sh "youtube-dl"
                    "-f" format-code
@@ -57,24 +68,43 @@
     (bot/send-message token chat-id (str "Готово! " link))
     (rm-file video-path)))
 
+(defn- send-audio-to-the-chat
+  [token chat-id audio-path audio-name]
+  (bot/send-audio token chat-id audio-path :title audio-name)
+  (rm-file audio-path))
+
 (defn- download-youtube-video
   [token chat-id config url]
   (bot/send-message token chat-id "Уже качаю")
   (let [output-format    (conf/youtube-dl-output-format config)
         output-folder    (conf/youtube-dl-output-folder config)
         best-format-code (extract-best-format-code url)
-        video-name       (youtube-dl-get-video-name output-format best-format-code url)
+        video-name       (youtube-dl-get-name output-format best-format-code url)
         video-path       (str/join [output-folder video-name])]
-    (case (youtube-dl-download-video url best-format-code video-path)
+    (case (youtube-dl-download url best-format-code video-path)
       0 (send-link-to-the-chat token chat-id video-path video-name config)
       (bot/send-message token chat-id "Че то никак :("))))
 
+(defn- download-youtube-audio
+  [token chat-id config url]
+  (bot/send-message token chat-id "Уже качаю")
+  (let [output-format    (conf/youtube-dl-output-format config)
+        output-folder    (conf/youtube-dl-output-folder config)
+        best-format-code (extract-audio-format-code url)
+        audio-name       (youtube-dl-get-name output-format best-format-code url)
+        audio-path       (str/join [output-folder audio-name])]
+    (case (youtube-dl-download url best-format-code audio-path)
+      0 (send-audio-to-the-chat token chat-id audio-path audio-name)
+      (bot/send-message token chat-id "Чё то никак :("))))
+
 (defn execute-download-command
-  [config body]
+  [config body audio?]
   (let [message (or (:message body) (:edited_message body))
         token   (conf/telegram-bot-api-token config)
         chat-id (get-in message [:chat :id])
         url     (utils/extract-entity body "url")]
     (if url
-      (download-youtube-video token chat-id config url)
+      (if audio?
+        (download-youtube-audio token chat-id config url)
+        (download-youtube-video token chat-id config url))
       (bot/send-message token chat-id "А что скачать то надо?"))))

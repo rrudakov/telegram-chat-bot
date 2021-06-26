@@ -29,7 +29,8 @@
   [config body]
   (if-let [command (utils/extract-entity body "bot_command")]
     (case command
-      "/download" (yt/execute-download-command config body)
+      "/video" (yt/execute-download-command config body false)
+      "/audio" (yt/execute-download-command config body true)
       "/coloring" (clr/execute-coloring-comand config body)
       (unknown-action config body command))
     (keep-conversation config body)))

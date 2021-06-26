@@ -46,6 +46,16 @@
                             {:name "video" :content (io/file video)}
                             {:name "caption" :content (or caption "")}]}))
 
+(defn send-audio
+  "Send `audio` file to chat with `chat-id` on behalf of bot."
+  [token chat-id audio & {:keys [caption title]}]
+  (let [multipart-data (cond-> [{:name "chat_id" :content (str chat-id)}
+                                {:name "audio" :content (io/file audio)}]
+                         (some? caption) (conj {:name "caption" :content caption})
+                         (some? title)   (conj {:name "title" :content title})) ]
+    (client/post (url-for-command token "sendAudio")
+                 {:multipart multipart-data})))
+
 (defn send-picture
   "Send `image` to chat with `chat-id` on behalf of bot."
   ([token chat-id image]
