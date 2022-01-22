@@ -1,29 +1,35 @@
 (ns telegram-chat-bot.commands.coloring
-  (:require [clj-http.client :as client]
-            [telegram-chat-bot.config :as conf]
-            [telegram-chat-bot.commands.utils :as utils]
-            [clojure.string :as str]
-            [telegram-chat-bot.bot.api :as bot]))
+  (:require
+   [clojure.data.json :as json]
+   [clojure.string :as str]
+   [org.httpkit.client :as http]
+   [telegram-chat-bot.bot.api :as bot]
+   [telegram-chat-bot.commands.utils :as utils]
+   [telegram-chat-bot.config :as conf]))
+
+(defn- <-json
+  [body]
+  (json/read-str body :key-fn keyword))
 
 (defn get-random-picture
   [config query]
   (let [url     (conf/google-search-url config)
         api-key (conf/google-api-key config)
         cx      (conf/google-cx config)]
-    (->> (client/get url
-                     {:accept :json
-                      :as     :json
-                      :query-params
-                      {"key" api-key
-                       "cx"  cx
-                       "q"   (str "раскраска " query)}})
-        (:body)
-        (:items)
-        (mapv :pagemap)
-        (mapv :cse_image)
-        (flatten)
-        (mapv :src)
-        (rand-nth))))
+    (->> (http/get url {:query-params
+                        {"key" api-key
+                         "cx"  cx
+                         "q"   (str "раскраска " query)}
+                        :headers {"Accept" "application/json"}})
+         (deref)
+         (:body)
+         (<-json)
+         (:items)
+         (mapv :pagemap)
+         (mapv :cse_image)
+         (flatten)
+         (mapv :src)
+         (rand-nth))))
 
 (defn execute-coloring-comand
   [config body]

@@ -1,11 +1,12 @@
 (ns telegram-chat-bot.commands.youtube
-  (:require [amazonica.aws.s3 :as s3]
-            [clj-time.core :as t]
-            [clojure.java.shell :as shell]
-            [clojure.string :as str]
-            [telegram-chat-bot.bot.api :as bot]
-            [telegram-chat-bot.commands.utils :as utils]
-            [telegram-chat-bot.config :as conf]))
+  (:require
+   [amazonica.aws.s3 :as s3]
+   [clj-time.core :as t]
+   [clojure.java.shell :as shell]
+   [clojure.string :as str]
+   [telegram-chat-bot.bot.api :as bot]
+   [telegram-chat-bot.commands.utils :as utils]
+   [telegram-chat-bot.config :as conf]))
 
 (defn- extract-best-format-code
   [url]

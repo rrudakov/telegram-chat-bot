@@ -1,7 +1,8 @@
 (ns telegram-chat-bot.bot.api
-  (:require [clj-http.client :as client]
-            [muuntaja.core :as m]
-            [clojure.java.io :as io]))
+  (:require
+   [clojure.data.json :as json]
+   [clojure.java.io :as io]
+   [org.httpkit.client :as http]))
 
 (def ^:private api-url
   "Telegram bot API base URL."
@@ -12,20 +13,16 @@
   [token command]
   (str api-url token "/" command))
 
-(defn- to-json
+(defn- ->json
   [body]
-  (->> body
-       (m/encode "application/json")
-       slurp))
+  (json/write-str body))
 
 (defn- execute-command
   "General interface for all available bot commands."
   [token command body]
-  (client/post (url-for-command token command)
-               {:body (to-json body)
-                :as :json
-                :content-type :json
-                :accept :json}))
+  (http/post (url-for-command token command)
+             {:body    (->json body)
+              :headers {"Content-Type" "application/json"}}))
 
 (defn send-message
   "Send message on behalf of bot."
@@ -41,10 +38,10 @@
 (defn send-video
   "Send `video` file to chat with `chat-id` on behalf of bot."
   [token chat-id video & {:keys [caption]}]
-  (client/post (url-for-command token "sendVideo")
-               {:multipart [{:name "chat_id" :content (str chat-id)}
-                            {:name "video" :content (io/file video)}
-                            {:name "caption" :content (or caption "")}]}))
+  (http/post (url-for-command token "sendVideo")
+             {:multipart [{:name "chat_id" :content (str chat-id)}
+                          {:name "video" :content (io/file video)}
+                          {:name "caption" :content (or caption "")}]}))
 
 (defn send-audio
   "Send `audio` file to chat with `chat-id` on behalf of bot."
@@ -52,9 +49,9 @@
   (let [multipart-data (cond-> [{:name "chat_id" :content (str chat-id)}
                                 {:name "audio" :content (io/file audio)}]
                          (some? caption) (conj {:name "caption" :content caption})
-                         (some? title)   (conj {:name "title" :content title})) ]
-    (client/post (url-for-command token "sendAudio")
-                 {:multipart multipart-data})))
+                         (some? title)   (conj {:name "title" :content title}))]
+    (http/post (url-for-command token "sendAudio")
+               {:multipart multipart-data})))
 
 (defn send-picture
   "Send `image` to chat with `chat-id` on behalf of bot."

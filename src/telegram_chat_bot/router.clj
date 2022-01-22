@@ -1,16 +1,17 @@
 (ns telegram-chat-bot.router
-  (:require [muuntaja.core :as m]
-            [reitit.coercion.spec :as rcs]
-            [reitit.ring :as ring]
-            [reitit.ring.coercion :as rrc]
-            [reitit.ring.middleware.exception :as exception]
-            [reitit.ring.middleware.muuntaja :as muuntaja]
-            [telegram-chat-bot.bot.api :as bot]
-            [telegram-chat-bot.commands.coloring :as clr]
-            [telegram-chat-bot.commands.utils :as utils]
-            [telegram-chat-bot.commands.youtube :as yt]
-            [telegram-chat-bot.config :as conf]
-            [telegram-chat-bot.specs.update :as specs]))
+  (:require
+   [muuntaja.core :as m]
+   [reitit.coercion.spec :as rcs]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion :as rrc]
+   [reitit.ring.middleware.exception :as exception]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [telegram-chat-bot.bot.api :as bot]
+   [telegram-chat-bot.commands.coloring :as clr]
+   [telegram-chat-bot.commands.utils :as utils]
+   [telegram-chat-bot.commands.youtube :as yt]
+   [telegram-chat-bot.config :as conf]
+   [telegram-chat-bot.specs.update :as specs]))
 
 (defn unknown-action
   [config body command]
@@ -29,8 +30,8 @@
   [config body]
   (if-let [command (utils/extract-entity body "bot_command")]
     (case command
-      "/video" (yt/execute-download-command config body false)
-      "/audio" (yt/execute-download-command config body true)
+      "/video"    (yt/execute-download-command config body false)
+      "/audio"    (yt/execute-download-command config body true)
       "/coloring" (clr/execute-coloring-comand config body)
       (unknown-action config body command))
     (keep-conversation config body)))
