@@ -1,9 +1,10 @@
 (ns telegram-chat-bot.commands.youtube
   (:require
-   [amazonica.aws.s3 :as s3]
-   [clj-time.core :as t]
+   [clojure.java.io :as io]
    [clojure.java.shell :as shell]
    [clojure.string :as str]
+   [cognitect.aws.client.api :as aws]
+   [cognitect.aws.credentials :as credentials]
    [telegram-chat-bot.bot.api :as bot]
    [telegram-chat-bot.commands.utils :as utils]
    [telegram-chat-bot.config :as conf]))
@@ -52,12 +53,16 @@
 (defn- upload-to-s3
   [config key file-path]
   (let [bucket-name (conf/bucket-name config)
-        cred        (conf/aws-creds config)]
-    (s3/put-object cred
-                   :bucket-name bucket-name
-                   :key key
-                   :file file-path)
-    (str (s3/generate-presigned-url cred bucket-name key (-> 6 t/hours t/from-now)))))
+        region      (conf/aws-region config)
+        cred        (credentials/basic-credentials-provider (conf/aws-creds config))
+        s3          (aws/client {:api                  :s3
+                                 :region               region
+                                 :credentials-provider cred})]
+    (aws/invoke s3 {:op      :PutObject
+                    :request {:Bucket bucket-name
+                              :Key    key
+                              :Body   (io/input-stream (io/file file-path))}})
+    (format "https://%s.s3.amazonaws.com/%s" bucket-name key)))
 
 (defn- rm-file
   [file-name]

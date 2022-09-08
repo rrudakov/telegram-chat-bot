@@ -12,4 +12,4 @@
   {:s3-bucket-name "telegram-bot-downloads"
    :s3-access-key  #env AWS_ACCESS_KEY_ID
    :s3-secret-key  #env AWS_SECRET_ACCESS_KEY
-   :s3-endpoint    "eu-central-1"}}}
+   :s3-region      "eu-central-1"}}}

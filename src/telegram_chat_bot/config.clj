@@ -1,6 +1,7 @@
 (ns telegram-chat-bot.config
-  (:require [aero.core :as aero]
-            [clojure.java.io :as io]))
+  (:require
+   [aero.core :as aero]
+   [clojure.java.io :as io]))
 
 (def config
   "Read application configuration from resources."
@@ -22,12 +23,15 @@
   [config]
   (get-in config [:app :aws :s3-bucket-name]))
 
+(defn aws-region
+  [config]
+  (get-in config [:app :aws :s3-endpoint]))
+
 (defn aws-creds
   [config]
   (let [aws (get-in config [:app :aws])]
-    {:access-key (:s3-access-key aws)
-     :secret-key (:s3-secret-key aws)
-     :endpoint   (:s3-endpoint aws)}))
+    {:access-key-id     (:s3-access-key aws)
+     :secret-access-key (:s3-secret-key aws)}))
 
 (defn google-api-key
   [config]
