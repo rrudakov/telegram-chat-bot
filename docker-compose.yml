@@ -1,11 +1,12 @@
-web:
-  build: .
-  restart: always
-  ports:
-    - "3001:3001"
-  environment:
-    TELEGRAM_BOT_API_TOKEN: ${TELEGRAM_BOT_API_TOKEN}
-    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    GOOGLE_API_KEY: ${GOOGLE_API_KEY}
-    GOOGLE_SEARCH_ENGINE_ID: ${GOOGLE_SEARCH_ENGINE_ID}
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      TELEGRAM_BOT_API_TOKEN: ${TELEGRAM_BOT_API_TOKEN}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      GOOGLE_SEARCH_ENGINE_ID: ${GOOGLE_SEARCH_ENGINE_ID}

@@ -16,8 +16,7 @@
                  [clj-http "3.12.3"]
                  [cheshire "5.11.0"]
                  [amazonica "0.3.161"]
-                 [clj-time "0.15.2"]
-                 [com.fasterxml.jackson.core/jackson-core "2.12.2"]]
+                 [clj-time "0.15.2"]]
   :repl-options {:init-ns telegram-chat-bot.core}
   :release-tasks [["vcs" "assert-committed"]
                   ["change" "version" "leiningen.release/bump-version"]
