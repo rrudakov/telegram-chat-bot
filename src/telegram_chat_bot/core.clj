@@ -1,4 +1,5 @@
 (ns telegram-chat-bot.core
+  (:gen-class)
   (:require
    [org.httpkit.server :refer [run-server]]
    [reitit.ring :as ring]
