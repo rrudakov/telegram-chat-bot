@@ -25,7 +25,7 @@
 
 (defn aws-region
   [config]
-  (get-in config [:app :aws :s3-endpoint]))
+  (get-in config [:app :aws :s3-region]))
 
 (defn aws-creds
   [config]

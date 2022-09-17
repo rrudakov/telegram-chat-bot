@@ -25,6 +25,10 @@
   (println "Copy sources and resources")
   (b/copy-dir {:src-dirs   ["src" "resources"]
                :target-dir class-dir})
+  (println "Compile sources")
+  (b/compile-clj {:basis     basis
+                  :src-dirs  ["src"]
+                  :class-dir class-dir})
   (println "Build uberjar")
   (b/uber {:class-dir class-dir
            :uber-file uber-file

@@ -14,5 +14,5 @@
      :not-acceptable     (constantly {:status 406 :body "Not acceptable"})})))
 
 (defn -main
-  []
+  [& _args]
   (run-server #'app {:port 3001}))
