@@ -3,9 +3,12 @@
    [aero.core :as aero]
    [clojure.java.io :as io]))
 
-(def config
+(defn config
   "Read application configuration from resources."
-  (aero/read-config (io/resource "config/config.edn")))
+  [profile]
+  (-> "config/config.edn"
+      io/resource
+      (aero/read-config {:profile profile})))
 
 (defn telegram-bot-api-token
   [config]
@@ -44,3 +47,11 @@
 (defn google-search-url
   [config]
   (get-in config [:app :coloring :search-url]))
+
+
+(def wrap-app-config
+  {:name    ::wrap-app-config
+   :compile (fn [{:keys [app-config]} _]
+              (fn [handler]
+                (fn [request]
+                  (handler (assoc request :app-config app-config)))))})

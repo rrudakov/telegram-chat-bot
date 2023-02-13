@@ -11,7 +11,8 @@
    [telegram-chat-bot.commands.utils :as utils]
    [telegram-chat-bot.commands.youtube :as yt]
    [telegram-chat-bot.config :as conf]
-   [telegram-chat-bot.specs.update :as specs]))
+   [telegram-chat-bot.specs.update :as specs]
+   [taoensso.timbre :as log]))
 
 (defn unknown-action
   [config body command]
@@ -37,19 +38,25 @@
     (keep-conversation config body)))
 
 (defn handler
-  [config]
-  (fn [{:keys [parameters]}]
-    (future (execute-task config (:body parameters)))
-    {:status 200, :body "True"}))
+  [{:keys [parameters app-config]}]
+  (future
+    (try
+      (execute-task app-config (:body parameters))
+      (catch Exception e
+        (log/error e (.getMessage e)))))
+  {:status 200, :body "True"})
 
-(def router
+(defn router
+  [{:keys [config]}]
   (ring/router
-   ["/bot" {:post {:parameters {:body ::specs/update}
-                   :handler    (handler conf/config)}}]
-   {:data {:muuntaja   m/instance
-           :coercion   rcs/coercion
-           :middleware [exception/exception-middleware
-                        muuntaja/format-middleware
-                        rrc/coerce-exceptions-middleware
-                        rrc/coerce-request-middleware
-                        rrc/coerce-response-middleware]}}))
+    ["/bot" {:post {:parameters {:body ::specs/update}
+                    :handler    handler}}]
+    {:data {:app-config config
+            :muuntaja   m/instance
+            :coercion   rcs/coercion
+            :middleware [conf/wrap-app-config
+                         exception/exception-middleware
+                         muuntaja/format-middleware
+                         rrc/coerce-exceptions-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware]}}))

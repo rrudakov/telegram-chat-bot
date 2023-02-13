@@ -1,15 +1,26 @@
-{:app
+{:secrets #profile {:local #include  #join [#env HOME "/.telegram-chat-bot-secrets.edn"]}
+ :app
  {:youtube
-  {:output-format "%(title)s-%(epoch)s.%(ext)s"
+  {:output-format "%(id)s-%(epoch)s.%(ext)s"
    :output-folder "/tmp/"}
   :coloring
-  {:api-key    #env GOOGLE_API_KEY
-   :cx         #env GOOGLE_SEARCH_ENGINE_ID
+  {:api-key
+   #profile {:local   #ref [:secrets :google-api-key]
+             :default #env GOOGLE_API_KEY}
+   :cx
+   #profile {:local   #ref [:secrets :google-search-engine-id]
+             :default #env GOOGLE_SEARCH_ENGINE_ID}
    :search-url "https://www.googleapis.com/customsearch/v1/siterestrict"}
   :telegram
-  {:bot-api-key #env TELEGRAM_BOT_API_TOKEN}
+  {:bot-api-key
+   #profile {:local   #ref [:secrets :telegram-bot-api-token]
+             :default #env TELEGRAM_BOT_API_TOKEN}}
   :aws
   {:s3-bucket-name "telegram-bot-downloads"
-   :s3-access-key  #env AWS_ACCESS_KEY_ID
-   :s3-secret-key  #env AWS_SECRET_ACCESS_KEY
+   :s3-access-key
+   #profile {:local   #ref [:secrets :aws-access-key-id]
+             :default #env AWS_ACCESS_KEY_ID}
+   :s3-secret-key
+   #profile {:local   #ref [:secrets :aws-secret-access-key]
+             :default #env AWS_SECRET_ACCESS_KEY}
    :s3-region      "eu-central-1"}}}

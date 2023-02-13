@@ -38,16 +38,20 @@
 (defn send-video
   "Send `video` file to chat with `chat-id` on behalf of bot."
   [token chat-id video & {:keys [caption]}]
-  (http/post (url-for-command token "sendVideo")
-             {:multipart [{:name "chat_id" :content (str chat-id)}
-                          {:name "video" :content (io/file video)}
-                          {:name "caption" :content (or caption "")}]}))
+  (let [file     (io/file video)
+        filename (.getName file)]
+    (http/post (url-for-command token "sendVideo")
+               {:multipart [{:name "chat_id" :content (str chat-id)}
+                            {:name "video" :content file :filename filename}
+                            {:name "caption" :content (or caption "")}]})))
 
 (defn send-audio
   "Send `audio` file to chat with `chat-id` on behalf of bot."
   [token chat-id audio & {:keys [caption title]}]
-  (let [multipart-data (cond-> [{:name "chat_id" :content (str chat-id)}
-                                {:name "audio" :content (io/file audio)}]
+  (let [file           (io/file audio)
+        filename       (.getName file)
+        multipart-data (cond-> [{:name "chat_id" :content (str chat-id)}
+                                {:name "audio" :content file :filename filename}]
                          (some? caption) (conj {:name "caption" :content caption})
                          (some? title)   (conj {:name "title" :content title}))]
     (http/post (url-for-command token "sendAudio")

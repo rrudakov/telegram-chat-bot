@@ -7,7 +7,9 @@
    [cognitect.aws.credentials :as credentials]
    [telegram-chat-bot.bot.api :as bot]
    [telegram-chat-bot.commands.utils :as utils]
-   [telegram-chat-bot.config :as conf]))
+   [telegram-chat-bot.config :as conf]
+   [taoensso.timbre :as log]
+   [clojure.data.json :as json]))
 
 (defn- extract-best-format-code
   [url]
@@ -50,6 +52,8 @@
                    url
                    "--restrict-filenames")))
 
+
+
 (defn- upload-to-s3
   [config key file-path]
   (let [bucket-name (conf/bucket-name config)
@@ -70,18 +74,34 @@
 
 (defn- send-link-to-the-chat
   [token chat-id video-path video-name config]
-  (let [link (upload-to-s3 config video-name video-path)]
-    (bot/send-message token chat-id (str "Готово! " link))
-    (rm-file video-path)))
+  (if-let [link (upload-to-s3 config video-name video-path)]
+    (let [{:keys [status body]}
+          @(bot/send-message token chat-id (str "Готово! " link))]
+      (if (< status 400)
+        (do
+          (log/infof "Video was sent successfully. Deleting the file %s"
+                     video-path)
+          (rm-file video-path))
+        (throw (ex-info "Unable to send a link to the chat"
+                        (json/read-str body)))))
+    (throw (ex-info "Unable to upload file to S3" {}))))
 
 (defn- send-audio-to-the-chat
   [token chat-id audio-path audio-name]
-  (bot/send-audio token chat-id audio-path :title audio-name)
-  (rm-file audio-path))
+  (let [{:keys [status body]}
+        @(bot/send-audio token chat-id audio-path :title audio-name)]
+    (if (< status 400)
+      (do
+        (log/infof "Audio was sent successfully. Deleting the file %s"
+                   audio-path)
+        (rm-file audio-path))
+      (throw (ex-info "Unable to send audio to the chat"
+                      (json/read-str body))))))
 
 (defn- download-youtube-video
   [token chat-id config url]
   (bot/send-message token chat-id "Уже качаю")
+  (log/infof "Start downloading video from %s in chat %d" url chat-id)
   (let [output-format    (conf/youtube-dl-output-format config)
         output-folder    (conf/youtube-dl-output-folder config)
         best-format-code (extract-best-format-code url)
@@ -94,6 +114,7 @@
 (defn- download-youtube-audio
   [token chat-id config url]
   (bot/send-message token chat-id "Уже качаю")
+  (log/infof "Start downloading audio from %s in chat %d" url chat-id)
   (let [output-format    (conf/youtube-dl-output-format config)
         output-folder    (conf/youtube-dl-output-folder config)
         best-format-code (extract-audio-format-code url)
