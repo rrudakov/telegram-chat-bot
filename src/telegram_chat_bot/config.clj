@@ -18,6 +18,10 @@
   [config]
   (get-in config [:app :youtube :output-format]))
 
+(defn youtube-dl-output-format-mp3
+  [config]
+  (get-in config [:app :youtube :output-format-mp3]))
+
 (defn youtube-dl-output-folder
   [config]
   (get-in config [:app :youtube :output-folder]))

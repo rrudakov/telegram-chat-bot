@@ -13,30 +13,17 @@
 
 (defn- extract-best-format-code
   [url]
-  (some->> (shell/sh "youtube-dl" "-F" url)
+  (some->> (shell/sh "yt-dlp" "-F" "-S" "quality,res" url)
            (:out)
            (str/split-lines)
-           (filter #(str/includes? % "(best)"))
-           (last)
-           (re-find #"^(\d+)\s")
-           (second)))
-
-(defn- extract-audio-format-code
-  [url]
-  (some->> (shell/sh "youtube-dl" "-F" url)
-           (:out)
-           (str/split-lines)
-           (filterv #(and (str/includes? % "audio only")
-                          (str/includes? % "m4a")))
            (last)
            (re-find #"^(\d+)\s")
            (second)))
 
 (defn- youtube-dl-get-name
-  [output-format format-code url]
-  (->> (shell/sh "youtube-dl"
-                 "-f" format-code
-                 "--get-filename"
+  [output-format url]
+  (->> (shell/sh "yt-dlp"
+                 "--print" "filename"
                  "-o" output-format
                  url
                  "--restrict-filenames")
@@ -45,14 +32,22 @@
 
 (defn- youtube-dl-download
   [url format-code output-format]
-  (:exit (shell/sh "youtube-dl"
+  (:exit (shell/sh "yt-dlp"
                    "-f" format-code
                    "-q"
                    "-o" output-format
                    url
                    "--restrict-filenames")))
 
-
+(defn- youtube-dl-download-mp3
+  [url output-format]
+  (:exit (shell/sh "yt-dlp"
+                   "-x"
+                   "--audio-format" "mp3"
+                   "-q"
+                   "-o" output-format
+                   url
+                   "--restrict-filenames")))
 
 (defn- upload-to-s3
   [config key file-path]
@@ -105,7 +100,7 @@
   (let [output-format    (conf/youtube-dl-output-format config)
         output-folder    (conf/youtube-dl-output-folder config)
         best-format-code (extract-best-format-code url)
-        video-name       (youtube-dl-get-name output-format best-format-code url)
+        video-name       (youtube-dl-get-name output-format url)
         video-path       (str/join [output-folder video-name])]
     (case (youtube-dl-download url best-format-code video-path)
       0 (send-link-to-the-chat token chat-id video-path video-name config)
@@ -115,12 +110,11 @@
   [token chat-id config url]
   (bot/send-message token chat-id "Уже качаю")
   (log/infof "Start downloading audio from %s in chat %d" url chat-id)
-  (let [output-format    (conf/youtube-dl-output-format config)
-        output-folder    (conf/youtube-dl-output-folder config)
-        best-format-code (extract-audio-format-code url)
-        audio-name       (youtube-dl-get-name output-format best-format-code url)
-        audio-path       (str/join [output-folder audio-name])]
-    (case (youtube-dl-download url best-format-code audio-path)
+  (let [output-format (conf/youtube-dl-output-format-mp3 config)
+        output-folder (conf/youtube-dl-output-folder config)
+        audio-name    (youtube-dl-get-name output-format url)
+        audio-path    (str/join [output-folder audio-name])]
+    (case (youtube-dl-download-mp3 url audio-path)
       0 (send-audio-to-the-chat token chat-id audio-path audio-name)
       (bot/send-message token chat-id "Чё то никак :("))))
 

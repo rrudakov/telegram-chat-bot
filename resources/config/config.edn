@@ -1,8 +1,9 @@
 {:secrets #profile {:local #include  #join [#env HOME "/.telegram-chat-bot-secrets.edn"]}
  :app
  {:youtube
-  {:output-format "%(id)s-%(epoch)s.%(ext)s"
-   :output-folder "/tmp/"}
+  {:output-format     "%(id)s-%(epoch)s.%(ext)s"
+   :output-format-mp3 "%(id)s-%(epoch)s.mp3"
+   :output-folder     "/tmp/"}
   :coloring
   {:api-key
    #profile {:local   #ref [:secrets :google-api-key]
