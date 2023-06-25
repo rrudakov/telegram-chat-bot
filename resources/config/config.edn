@@ -12,6 +12,11 @@
    #profile {:local   #ref [:secrets :google-search-engine-id]
              :default #env GOOGLE_SEARCH_ENGINE_ID}
    :search-url "https://www.googleapis.com/customsearch/v1/siterestrict"}
+  :weather
+  {:api-key
+   #profile {:local   #ref [:secrets :weather-api-key]
+             :default #env WEATHER_API_KEY}
+   :base-url "https://api.weatherapi.com"}
   :telegram
   {:bot-api-key
    #profile {:local   #ref [:secrets :telegram-bot-api-token]

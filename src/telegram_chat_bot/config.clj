@@ -1,7 +1,8 @@
 (ns telegram-chat-bot.config
   (:require
    [aero.core :as aero]
-   [clojure.java.io :as io]))
+   [clojure.java.io :as io]
+   [clojure.string :as str]))
 
 (defn config
   "Read application configuration from resources."
@@ -52,6 +53,17 @@
   [config]
   (get-in config [:app :coloring :search-url]))
 
+(defn weather-api-key
+  [config]
+  (get-in config [:app :weather :api-key]))
+
+(defn weather-base-url
+  [config]
+  (get-in config [:app :weather :base-url]))
+
+(defn weather-search-url
+  [config]
+  (format "%s/v1/forecast.json" (weather-base-url config)))
 
 (def wrap-app-config
   {:name    ::wrap-app-config

@@ -12,7 +12,8 @@
    [telegram-chat-bot.commands.youtube :as yt]
    [telegram-chat-bot.config :as conf]
    [telegram-chat-bot.specs.update :as specs]
-   [taoensso.timbre :as log]))
+   [taoensso.timbre :as log]
+   [telegram-chat-bot.commands.weather :as weather]))
 
 (defn unknown-action
   [config body command]
@@ -34,6 +35,7 @@
       "/video"    (yt/execute-download-command config body false)
       "/audio"    (yt/execute-download-command config body true)
       "/coloring" (clr/execute-coloring-comand config body)
+      "/weather"  (weather/execute-weather-command config body)
       (unknown-action config body command))
     (keep-conversation config body)))
 
