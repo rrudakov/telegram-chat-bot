@@ -1,6 +1,6 @@
 (ns telegram-chat-bot.core-test
-  (:require [clojure.test :refer :all]
-            [telegram-chat-bot.core :refer :all]))
+  (:require
+   [clojure.test :refer [deftest is testing]]))
 
 (deftest a-test
   (testing "FIXME, I fail."

@@ -3,7 +3,7 @@
    [clojure.tools.build.api :as b]))
 
 (def lib 'rrudakov/telegram-chat-bot)
-(def version (format "1.2.%s" (b/git-count-revs nil)))
+(def version "1.3.0")
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def uber-file (format "target/%s-%s.jar" (name lib) version))
@@ -26,9 +26,10 @@
   (b/copy-dir {:src-dirs   ["src" "resources"]
                :target-dir class-dir})
   (println "Compile sources")
-  (b/compile-clj {:basis     basis
-                  :src-dirs  ["src"]
-                  :class-dir class-dir})
+  (b/compile-clj {:basis        basis
+                  :src-dirs     ["src"]
+                  :class-dir    class-dir
+                  :compile-opts {:direct-linking true}})
   (println "Build uberjar")
   (b/uber {:class-dir class-dir
            :uber-file uber-file

@@ -1,14 +1,24 @@
 # telegram-chat-bot
 
-A Clojure library designed to ... well, that part is up to you.
+A Telegram chat bot, written in Clojure.
 
 ## Usage
 
-FIXME
+Bot can be used in private conversation. Add
+https://t.me/awesome_roma_bot to your contact list.
+
+### Supported commands ###
+
+- Download YouTube video (`/video youtube-video-link`)
+- Download YouTube audio (`/audio youtube-video-link`). Audio is
+  extracted from video in mp3 format.
+- Get current weather in an arbitrary city (`/weather city`).
+- Get a random coloring page for kids by search keyword (`/coloring
+  keyword`).
 
 ## License
 
-Copyright © 2021 FIXME
+Copyright © 2021 Roman Rudakov
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
