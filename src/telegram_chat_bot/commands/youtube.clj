@@ -32,22 +32,22 @@
 
 (defn- youtube-dl-download
   [url format-code output-format]
-  (:exit (shell/sh "yt-dlp"
-                   "-f" format-code
-                   "-q"
-                   "-o" output-format
-                   url
-                   "--restrict-filenames")))
+  (shell/sh "yt-dlp"
+            "-f" format-code
+            "-q"
+            "-o" output-format
+            url
+            "--restrict-filenames"))
 
 (defn- youtube-dl-download-mp3
   [url output-format]
-  (:exit (shell/sh "yt-dlp"
-                   "-x"
-                   "--audio-format" "mp3"
-                   "-q"
-                   "-o" output-format
-                   url
-                   "--restrict-filenames")))
+  (shell/sh "yt-dlp"
+            "-x"
+            "--audio-format" "mp3"
+            "-q"
+            "-o" output-format
+            url
+            "--restrict-filenames"))
 
 (defn- upload-to-s3
   [config key file-path]
@@ -97,26 +97,32 @@
   [token chat-id config url]
   (bot/send-message token chat-id "Уже качаю")
   (log/infof "Start downloading video from %s in chat %d" url chat-id)
-  (let [output-format    (conf/youtube-dl-output-format config)
-        output-folder    (conf/youtube-dl-output-folder config)
-        best-format-code (extract-best-format-code url)
-        video-name       (youtube-dl-get-name output-format url)
-        video-path       (str/join [output-folder video-name])]
-    (case (youtube-dl-download url best-format-code video-path)
+  (let [output-format          (conf/youtube-dl-output-format config)
+        output-folder          (conf/youtube-dl-output-folder config)
+        best-format-code       (extract-best-format-code url)
+        video-name             (youtube-dl-get-name output-format url)
+        video-path             (str/join [output-folder video-name])
+        {:keys [exit err out]} (youtube-dl-download url best-format-code video-path)]
+    (case exit
       0 (send-link-to-the-chat token chat-id video-path video-name config)
-      (bot/send-message token chat-id "Че то никак :("))))
+      (do
+        (log/errorf "Exit code %d. System error: %s. System out: %s" exit err out)
+        (bot/send-message token chat-id "Че то никак :(")))))
 
 (defn- download-youtube-audio
   [token chat-id config url]
   (bot/send-message token chat-id "Уже качаю")
   (log/infof "Start downloading audio from %s in chat %d" url chat-id)
-  (let [output-format (conf/youtube-dl-output-format-mp3 config)
-        output-folder (conf/youtube-dl-output-folder config)
-        audio-name    (youtube-dl-get-name output-format url)
-        audio-path    (str/join [output-folder audio-name])]
-    (case (youtube-dl-download-mp3 url audio-path)
+  (let [output-format          (conf/youtube-dl-output-format-mp3 config)
+        output-folder          (conf/youtube-dl-output-folder config)
+        audio-name             (youtube-dl-get-name output-format url)
+        audio-path             (str/join [output-folder audio-name])
+        {:keys [exit err out]} (youtube-dl-download-mp3 url audio-path)]
+    (case exit
       0 (send-audio-to-the-chat token chat-id audio-path audio-name)
-      (bot/send-message token chat-id "Чё то никак :("))))
+      (do
+        (log/errorf "Exit code %d. System error: %s. System out: %s" exit err out)
+        (bot/send-message token chat-id "Чё то никак :(")))))
 
 (defn execute-download-command
   [config body audio?]
